@@ -1,0 +1,48 @@
+body {
+	min-height:550px;
+}
+.container{
+	width: 600px;
+}
+.pics{
+	width: 500px;
+	/*background-color: #ff0000;*/
+	padding: 0;
+	margin-bottom: 40px;
+}
+
+.pic{
+	width: 500px;
+	padding: 0;
+	margin-top:50px;
+}
+
+.pic img{
+	width: 500px;
+	margin-bottom: 16px;
+	border: 2px solid #eee;
+}
+
+.progress{
+	margin-top:4px;
+}
+
+#copy_message{
+	display: none;
+	position: fixed;
+	top:0;
+	width: 200px;
+	height: 46px;
+	padding-top: 12px;
+	text-align: center;
+	margin: auto;
+	left:0;
+	right:0;
+}
+
+#help_message{
+	font-size: 44px;
+	color: #bbb;
+	display: block;
+	margin-top: 100px;
+}

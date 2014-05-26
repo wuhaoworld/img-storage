@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>极简图床</title>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/home.css">
+    <script src="//upcdn.b0.upaiyun.com/libs/jquery/jquery-2.0.3.min.js"></script>
+    <script src="js/ZeroClipboard.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</head>
+<body>
+
+
+<script language="javascript">
+function onprogress(event) {
+    　if (event.lengthComputable) {
+　　　　　　var complete = (event.loaded / event.total * 100 | 0);
+　　　　　　var progress = $('.progress:last .progress-bar');
+　　　　　　progress.html(complete + "%") ;
+　　　　　　progress.css("width",complete + "%");
+　　　　}
+};
+var xhr_provider = function() {
+    var xhr = jQuery.ajaxSettings.xhr();
+    if(onprogress && xhr.upload) {
+        xhr.upload.addEventListener('progress', onprogress, false);
+    }
+    return xhr;
+};
+
+function upload() {
+    $("body").css("border","none");
+    var d = this.result.substr( this.result.indexOf(',')+1);
+    var img = document.createElement("img");
+    img.src= "data:image/jpeg;base64,"+d;
+    var random_id = "id_" + Math.floor(Math.random()*100000);
+    if($(".pic").length>0){
+        $(".pic:first").before("<div class='pic' id='" + random_id + "'></div>");    
+    }else{
+        $(".pics").append("<div class='pic' id='" + random_id + "'></div>");    
+    }
+    
+    
+    $("#" + random_id).append(img);
+
+    var img_width = $(img).width();
+
+    var process_html = '<div class="progress">' +
+                    '<div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width:0%;">' +
+                    '0%</div></div>';
+
+    $("#" + random_id).append(process_html);
+    $.ajax({
+        type: 'POST',
+        url:"upload.php",
+        data: d,
+        xhr: xhr_provider
+    }).done(function(data){
+        if(data.status == "success"){
+
+            var pic_url_html = '<form class="form-inline" role="form">'+
+                              '<div class="form-group">'+
+                                '<label class="sr-only" for="exampleInputEmail2">地址</label>'+
+                                '<input type="text" class="form-control" value="' + data.url +
+                                '" style="width:384px">'+
+                              '</div>'+
+                              ' <button type="button" id="copy_button_' + random_id + '" class="btn btn-default copy-button" data-clipboard-text="' + data.url + '">复制</button>'+
+                              ' <a type="button" class="btn btn-default" href="' + data.url + '" target="_blank">打开</a>'+
+                            '</form>';
+            $('.progress:last').remove();
+            $("#" + random_id).append(pic_url_html);
+
+            var client = new ZeroClipboard($("#copy_button_" + random_id));
+            client.on( 'complete', function(client, args) {
+                $("#copy_message").addClass("alert-success");
+                $("#copy_message").html("复制成功");
+                $("#copy_message").slideToggle();
+                setTimeout(function(){
+                    $("#copy_message").slideUp(500);
+                },1500);
+                // alert("复制成功，复制内容为："+ args.text);
+            } );
+
+            console.log(data.url);
+        }
+    });
+}
+
+document.body.onpaste = function(e) {
+    $("#help_message").hide();
+    var items = e.clipboardData.items;
+    for (var i = 0; i < items.length; ++i) {
+        var item = e.clipboardData.items[i];
+        if (items[i].kind == 'file' && items[i].type == 'image/png') {
+
+            //FileReader可以参考API
+            var fileReader = new FileReader();
+            //readAsDataURL是一个异步过程，这里提供回调方法
+            fileReader.onloadend = upload;
+            //DataURL，不清楚了可以去看下资料
+            fileReader.readAsDataURL(item.getAsFile());
+            break; 
+        }
+    }
+};
+</script>
+
+<div class="container">
+<center>
+<div class="pics">
+
+    <span id="help_message">粘贴或拖动图片至此页面</span>
+</div>
+
+</center>
+</div>
+<script>
+// 针对拖放的处理
+if (window.FileReader) {
+        cnt = document.body;
+        // 判断是否图片
+        function isImage(type) {
+            switch (type) {
+            case 'image/jpeg':
+            case 'image/png':
+            case 'image/gif':
+            case 'image/bmp':
+            case 'image/jpg':
+                return true;
+            default:
+                return false;
+            }
+        }
+
+        // 处理拖放文件列表
+        function handleFileSelect(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+            $("#help_message").hide();
+            var files = evt.dataTransfer.files;
+
+            for (var i = 0, f; f = files[i]; i++) {
+
+                var t = f.type ? f.type : 'n/a';
+                var size = f.size;
+
+                console.log(f.size);
+                var reader = new FileReader();
+                var isImg = isImage(t);
+
+                // 处理得到的图片
+                if (isImg) {
+                    if(size > 1024*1024*2){
+                       alert('请选择小于 2M 的图片！');
+                       $("body").css("border","none");
+                    }else{
+                        reader.onload = upload;
+                        reader.readAsDataURL(f);    
+                    }
+                } else {
+                    alert('请拖入图片！');
+                    $("body").css("border","none");
+                }
+            }
+        }
+        
+        // 处理插入拖出效果
+        function handleDragEnter(evt){ this.setAttribute('style', 'border:#eee 4px dashed;'); }
+        function handleDragLeave(evt){ this.setAttribute('style', ''); }
+
+        // 处理文件拖入事件，防止浏览器默认事件带来的重定向
+        function handleDragOver(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+        }
+        
+        cnt.addEventListener('dragenter', handleDragEnter, false);
+        cnt.addEventListener('dragover', handleDragOver, false);
+        cnt.addEventListener('drop', handleFileSelect, false);
+        cnt.addEventListener('dragleave', handleDragLeave, false);
+        
+    } else {
+        document.getElementById('section').innerHTML = '你的浏览器不支持啊，同学';
+    }
+
+</script>
+<div id="copy_message" class="alert book_message">复制成功</div>
+
+</body>
+</html>
