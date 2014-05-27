@@ -29,11 +29,8 @@ var xhr_provider = function() {
     return xhr;
 };
 
-function upload() {
+function upload(img, d, name) {
     $("body").css("border","none");
-    var d = this.result.substr( this.result.indexOf(',')+1);
-    var img = document.createElement("img");
-    img.src= "data:image/jpeg;base64,"+d;
     var random_id = "id_" + Math.floor(Math.random()*100000);
     if($(".pic").length>0){
         $(".pic:first").before("<div class='pic' id='" + random_id + "'></div>");    
@@ -53,7 +50,7 @@ function upload() {
     $("#" + random_id).append(process_html);
     $.ajax({
         type: 'POST',
-        url:"upload.php",
+        url:"upload.php?name=" + encodeURIComponent(name),
         data: d,
         xhr: xhr_provider
     }).done(function(data){
@@ -92,13 +89,15 @@ document.body.onpaste = function(e) {
     var items = e.clipboardData.items;
     for (var i = 0; i < items.length; ++i) {
         var item = e.clipboardData.items[i];
+        console.log(item);
         if (items[i].kind == 'file' && items[i].type == 'image/png') {
-
-            //FileReader可以参考API
             var fileReader = new FileReader();
-            //readAsDataURL是一个异步过程，这里提供回调方法
-            fileReader.onloadend = upload;
-            //DataURL，不清楚了可以去看下资料
+            fileReader.onloadend = function (){
+                var d = this.result.substr( this.result.indexOf(',')+1);
+                var img = document.createElement("img");
+                img.src= "data:image/jpeg;base64,"+d;    
+                upload(img, d, "");
+            }
             fileReader.readAsDataURL(item.getAsFile());
             break; 
         }
@@ -139,27 +138,44 @@ if (window.FileReader) {
             evt.preventDefault();
             $("#help_message").hide();
             var files = evt.dataTransfer.files;
-
-            for (var i = 0, f; f = files[i]; i++) {
-
+            console.log(files);
+            for (var i = 0; i < files.length; i++) {
+                var f = files[i];
                 var t = f.type ? f.type : 'n/a';
                 var size = f.size;
-
-                console.log(f.size);
+                var name = f.name;
                 var reader = new FileReader();
                 var isImg = isImage(t);
 
-                // 处理得到的图片
+                // 处理得到的文件
                 if (isImg) {
                     if(size > 1024*1024*2){
                        alert('请选择小于 2M 的图片！');
                        $("body").css("border","none");
                     }else{
-                        reader.onload = upload;
+                        reader.onload = function (){
+                            var d = this.result.substr( this.result.indexOf(',')+1);
+                            var img = document.createElement("img");
+                            img.src= "data:image/jpeg;base64,"+d;    
+                            upload(img, d, "");
+                        }
+
                         reader.readAsDataURL(f);    
                     }
                 } else {
-                    alert('请拖入图片！');
+
+                    if(size > 1024*1024*10){
+                       alert('请选择小于 10M 的文件！');
+                       $("body").css("border","none");
+                    }else{
+                        reader.onload = function (){
+                            var d = this.result.substr( this.result.indexOf(',')+1);
+                            var img = document.createElement("img");
+                            img.src= "file.jpg";
+                            upload(img, d, name);
+                        }
+                        reader.readAsDataURL(f);    
+                    }
                     $("body").css("border","none");
                 }
             }
