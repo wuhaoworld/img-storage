@@ -1,7 +1,4 @@
 <?php
-error_reporting(-1);
-
-
 date_default_timezone_set('Asia/Shanghai');
 $content = file_get_contents("php://input");
 $content = base64_decode($content);
@@ -52,7 +49,6 @@ list($ret, $err) = Qiniu_PutFile($upToken, $key1, $file, $putExtra);
 if ($err !== null) {
     var_dump($err);
 } else {
-    // var_dump($ret);
     header('Content-type: application/json');
     echo '{"status":"success","url":"' . $img_url . '"}';
     die();
