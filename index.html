@@ -76,10 +76,8 @@ function upload(img, d, name) {
                 setTimeout(function(){
                     $("#copy_message").slideUp(500);
                 },1500);
-                // alert("复制成功，复制内容为："+ args.text);
             } );
 
-            console.log(data.url);
         }
     });
 }
@@ -89,7 +87,6 @@ document.body.onpaste = function(e) {
     var items = e.clipboardData.items;
     for (var i = 0; i < items.length; ++i) {
         var item = e.clipboardData.items[i];
-        console.log(item);
         if (items[i].kind == 'file' && items[i].type == 'image/png') {
             var fileReader = new FileReader();
             fileReader.onloadend = function (){
@@ -138,7 +135,6 @@ if (window.FileReader) {
             evt.preventDefault();
             $("#help_message").hide();
             var files = evt.dataTransfer.files;
-            console.log(files);
             for (var i = 0; i < files.length; i++) {
                 var f = files[i];
                 var t = f.type ? f.type : 'n/a';
