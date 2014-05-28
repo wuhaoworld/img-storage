@@ -17,7 +17,11 @@ function onprogress(event) {
     　if (event.lengthComputable) {
 　　　　　　var complete = (event.loaded / event.total * 100 | 0);
 　　　　　　var progress = $('.progress:last .progress-bar');
-　　　　　　progress.html(complete + "%") ;
+　　　　　　if(complete == 100){
+              progress.html("正在转存到七牛云存储...") ;
+            }else{
+              progress.html(complete + "%") ;
+            }
 　　　　　　progress.css("width",complete + "%");
 　　　　}
 };
@@ -33,12 +37,12 @@ function upload(img, d, name) {
     $("body").css("border","none");
     var random_id = "id_" + Math.floor(Math.random()*100000);
     if($(".pic").length>0){
-        $(".pic:first").before("<div class='pic' id='" + random_id + "'></div>");    
+        $(".pic:first").before("<div class='pic' id='" + random_id + "'></div>");
     }else{
-        $(".pics").append("<div class='pic' id='" + random_id + "'></div>");    
+        $(".pics").append("<div class='pic' id='" + random_id + "'></div>");
     }
-    
-    
+
+
     $("#" + random_id).append(img);
 
     var img_width = $(img).width();
@@ -92,11 +96,11 @@ document.body.onpaste = function(e) {
             fileReader.onloadend = function (){
                 var d = this.result.substr( this.result.indexOf(',')+1);
                 var img = document.createElement("img");
-                img.src= "data:image/jpeg;base64,"+d;    
+                img.src= "data:image/jpeg;base64,"+d;
                 upload(img, d, "");
             }
             fileReader.readAsDataURL(item.getAsFile());
-            break; 
+            break;
         }
     }
 };
@@ -152,11 +156,11 @@ if (window.FileReader) {
                         reader.onload = function (){
                             var d = this.result.substr( this.result.indexOf(',')+1);
                             var img = document.createElement("img");
-                            img.src= "data:image/jpeg;base64,"+d;    
+                            img.src= "data:image/jpeg;base64,"+d;
                             upload(img, d, "");
                         }
 
-                        reader.readAsDataURL(f);    
+                        reader.readAsDataURL(f);
                     }
                 } else {
 
@@ -170,13 +174,13 @@ if (window.FileReader) {
                             img.src= "file.jpg";
                             upload(img, d, name);
                         }
-                        reader.readAsDataURL(f);    
+                        reader.readAsDataURL(f);
                     }
                     $("body").css("border","none");
                 }
             }
         }
-        
+
         // 处理插入拖出效果
         function handleDragEnter(evt){ this.setAttribute('style', 'border:#eee 4px dashed;'); }
         function handleDragLeave(evt){ this.setAttribute('style', ''); }
@@ -186,12 +190,12 @@ if (window.FileReader) {
             evt.stopPropagation();
             evt.preventDefault();
         }
-        
+
         cnt.addEventListener('dragenter', handleDragEnter, false);
         cnt.addEventListener('dragover', handleDragOver, false);
         cnt.addEventListener('drop', handleFileSelect, false);
         cnt.addEventListener('dragleave', handleDragLeave, false);
-        
+
     } else {
         document.getElementById('section').innerHTML = '你的浏览器不支持啊，同学';
     }

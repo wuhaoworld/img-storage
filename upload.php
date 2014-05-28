@@ -1,4 +1,5 @@
 <?php
+error_reporting(-1);
 date_default_timezone_set('Asia/Shanghai');
 $content = file_get_contents("php://input");
 $content = base64_decode($content);
@@ -6,9 +7,9 @@ $content = base64_decode($content);
 $time = time();
 $salt = rand(100,999);
 if(isset($_GET['name']) && $_GET['name'] != ""){
-	$file_name = urldecode($_GET['name']);	
+	$file_name = urldecode($_GET['name']);
 }else{
-	$file_name = $time.$salt.".jpg";	
+	$file_name = $time.$salt.".jpg";
 }
 
 $folder = "upload/".date("Y-m-d", $time);
@@ -30,7 +31,6 @@ if(!$result){
     die();
 }
 // 转存到七牛
-
 require_once("qiniu/io.php");
 require_once("qiniu/rs.php");
 
@@ -46,6 +46,7 @@ $upToken = $putPolicy->Token(null);
 $putExtra = new Qiniu_PutExtra();
 $putExtra->Crc32 = 1;
 list($ret, $err) = Qiniu_PutFile($upToken, $key1, $file, $putExtra);
+//die("nini");
 if ($err !== null) {
     var_dump($err);
 } else {
