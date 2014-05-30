@@ -64,9 +64,10 @@ function upload(img, d, name) {
                               '<div class="form-group">'+
                                 '<label class="sr-only" for="exampleInputEmail2">地址</label>'+
                                 '<input type="text" class="form-control" value="' + data.url +
-                                '" style="width:384px">'+
+                                '" style="width:284px">'+
                               '</div>'+
                               ' <button type="button" id="copy_button_' + random_id + '" class="btn btn-default copy-button" data-clipboard-text="' + data.url + '">复制</button>'+
+                              ' <button type="button" id="copy_markdown_button_' + random_id + '" class="btn btn-default copy-button" data-clipboard-text="![](' + data.url + ')">markdown</button>'+
                               ' <a type="button" class="btn btn-default" href="' + data.url + '" target="_blank">打开</a>'+
                             '</form>';
             $('.progress:last').remove();
@@ -74,6 +75,16 @@ function upload(img, d, name) {
 
             var client = new ZeroClipboard($("#copy_button_" + random_id));
             client.on( 'complete', function(client, args) {
+                $("#copy_message").addClass("alert-success");
+                $("#copy_message").html("复制成功");
+                $("#copy_message").slideToggle();
+                setTimeout(function(){
+                    $("#copy_message").slideUp(500);
+                },1500);
+            } );
+
+            var copy_markdown_button = new ZeroClipboard($("#copy_markdown_button_" + random_id));
+            copy_markdown_button.on( 'complete', function(copy_markdown_button, args) {
                 $("#copy_message").addClass("alert-success");
                 $("#copy_message").html("复制成功");
                 $("#copy_message").slideToggle();
