@@ -9,212 +9,19 @@
     <script src="js/ZeroClipboard.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/jquery.cookie.js"></script>
+    
 </head>
 <body>
 <span class="setting">当前使用空间: <span id="current_bucket">公共空间</span>&nbsp;&nbsp;<a href="#"  tabindex="-1" id="setting_button" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">设置</a>&nbsp;&nbsp;<a href="">帮助</a></span>
-
-<script language="javascript">
-function onprogress(event) {
-    　if (event.lengthComputable) {
-　　　　　　var complete = (event.loaded / event.total * 100 | 0);
-　　　　　　var progress = $('.progress:last .progress-bar');
-　　　　　　if(complete == 100){
-              progress.html("正在转存到七牛云存储...") ;
-            }else{
-              progress.html(complete + "%") ;
-            }
-　　　　　　progress.css("width",complete + "%");
-　　　　}
-};
-var xhr_provider = function() {
-    var xhr = jQuery.ajaxSettings.xhr();
-    if(onprogress && xhr.upload) {
-        xhr.upload.addEventListener('progress', onprogress, false);
-    }
-    return xhr;
-};
-
-function upload(img, d, name) {
-    $("body").css("border","none");
-    var random_id = "id_" + Math.floor(Math.random()*100000);
-    if($(".pic").length>0){
-        $(".pic:first").before("<div class='pic' id='" + random_id + "'></div>");
-    }else{
-        $(".pics").append("<div class='pic' id='" + random_id + "'></div>");
-    }
-
-
-    $("#" + random_id).append(img);
-
-    var img_width = $(img).width();
-
-    var process_html = '<div class="progress">' +
-                    '<div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width:0%;">' +
-                    '0%</div></div>';
-
-    $("#" + random_id).append(process_html);
-    $.ajax({
-        type: 'POST',
-        url:"upload.php?name=" + encodeURIComponent(name),
-        data: d,
-        xhr: xhr_provider
-    }).done(function(data){
-        if(data.status == "success"){
-
-            var pic_url_html = '<form class="form-inline" role="form">'+
-                              '<div class="form-group">'+
-                                '<label class="sr-only" for="exampleInputEmail2">地址</label>'+
-                                '<input type="text" class="form-control" value="' + data.url +
-                                '" style="width:284px">'+
-                              '</div>'+
-                              ' <button type="button" id="copy_button_' + random_id + '" class="btn btn-default copy-button" data-clipboard-text="' + data.url + '">复制</button>'+
-                              ' <button type="button" id="copy_markdown_button_' + random_id + '" class="btn btn-default copy-button" data-clipboard-text="![](' + data.url + ')">markdown</button>'+
-                              ' <a type="button" class="btn btn-default" href="' + data.url + '" target="_blank">打开</a>'+
-                            '</form>';
-            $('.progress:last').remove();
-            $("#" + random_id).append(pic_url_html);
-
-            var client = new ZeroClipboard($("#copy_button_" + random_id));
-            client.on( 'complete', function(client, args) {
-                $("#copy_message").addClass("alert-success");
-                $("#copy_message").html("复制成功");
-                $("#copy_message").slideToggle();
-                setTimeout(function(){
-                    $("#copy_message").slideUp(500);
-                },1500);
-            } );
-
-            var copy_markdown_button = new ZeroClipboard($("#copy_markdown_button_" + random_id));
-            copy_markdown_button.on( 'complete', function(copy_markdown_button, args) {
-                $("#copy_message").addClass("alert-success");
-                $("#copy_message").html("复制成功");
-                $("#copy_message").slideToggle();
-                setTimeout(function(){
-                    $("#copy_message").slideUp(500);
-                },1500);
-            } );
-
-        }
-    });
-}
-
-document.body.onpaste = function(e) {
-    var items = e.clipboardData.items;
-    for (var i = 0; i < items.length; ++i) {
-        var item = e.clipboardData.items[i];
-        if (items[i].kind == 'file' && items[i].type == 'image/png') {
-            $("#help_message").hide();
-            var fileReader = new FileReader();
-            fileReader.onloadend = function (){
-                var d = this.result.substr( this.result.indexOf(',')+1);
-                var img = document.createElement("img");
-                img.src= "data:image/jpeg;base64,"+d;
-                upload(img, d, "");
-            }
-            fileReader.readAsDataURL(item.getAsFile());
-            break;
-        }else{
-            $("#help_message").html("请粘贴图片");
-        }
-    }
-};
-</script>
-
 <div class="container">
 <center>
 <div class="pics">
-
     <span id="help_message">粘贴或拖动图片至此页面</span>
+    <span>上传到公共空间的内容会不定期删除，<a target="_blank" href="https://portal.qiniu.com/signup?code=3lilcw8gorcya">注册七牛云存储</a>并在右上角设置为自己的账号，可免费使用七牛 10G 存储空间</span>
 </div>
 
 </center>
 </div>
-<script>
-// 针对拖放的处理
-if (window.FileReader) {
-        cnt = document.body;
-        // 判断是否图片
-        function isImage(type) {
-            switch (type) {
-            case 'image/jpeg':
-            case 'image/png':
-            case 'image/gif':
-            case 'image/bmp':
-            case 'image/jpg':
-                return true;
-            default:
-                return false;
-            }
-        }
-
-        // 处理拖放文件列表
-        function handleFileSelect(evt) {
-            evt.stopPropagation();
-            evt.preventDefault();
-            $("#help_message").hide();
-            var files = evt.dataTransfer.files;
-            for (var i = 0; i < files.length; i++) {
-                var f = files[i];
-                var t = f.type ? f.type : 'n/a';
-                var size = f.size;
-                var name = f.name;
-                var reader = new FileReader();
-                var isImg = isImage(t);
-
-                // 处理得到的文件
-                if (isImg) {
-                    if(size > 1024*1024*2){
-                       alert('请选择小于 2M 的图片！');
-                       $("body").css("border","none");
-                    }else{
-                        reader.onload = function (){
-                            var d = this.result.substr( this.result.indexOf(',')+1);
-                            var img = document.createElement("img");
-                            img.src= "data:image/jpeg;base64,"+d;
-                            upload(img, d, "");
-                        }
-
-                        reader.readAsDataURL(f);
-                    }
-                } else {
-
-                    if(size > 1024*1024*10){
-                       alert('请选择小于 10M 的文件！');
-                       $("body").css("border","none");
-                    }else{
-                        reader.onload = function (){
-                            var d = this.result.substr( this.result.indexOf(',')+1);
-                            var img = document.createElement("img");
-                            img.src= "file.jpg";
-                            upload(img, d, name);
-                        }
-                        reader.readAsDataURL(f);
-                    }
-                    $("body").css("border","none");
-                }
-            }
-        }
-
-        // 处理插入拖出效果
-        function handleDragEnter(evt){ this.setAttribute('style', 'border:#eee 4px dashed;'); }
-        function handleDragLeave(evt){ this.setAttribute('style', ''); }
-
-        // 处理文件拖入事件，防止浏览器默认事件带来的重定向
-        function handleDragOver(evt) {
-            evt.stopPropagation();
-            evt.preventDefault();
-        }
-
-        cnt.addEventListener('dragenter', handleDragEnter, false);
-        cnt.addEventListener('dragover', handleDragOver, false);
-        cnt.addEventListener('drop', handleFileSelect, false);
-        cnt.addEventListener('dragleave', handleDragLeave, false);
-
-    } else {
-        document.getElementById('section').innerHTML = '你的浏览器不支持啊，同学';
-    }
-
-</script>
 <div id="copy_message" class="alert book_message">复制成功</div>
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -222,7 +29,7 @@ if (window.FileReader) {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel">设置七牛云存储账号&nbsp;(<a href="">查看教程</a>)</h4>
+        <h4 class="modal-title" id="myModalLabel">设置七牛云存储账号</h4>
       </div>
       <div class="modal-body">
         <form class="form-horizontal" role="form">
@@ -261,49 +68,8 @@ if (window.FileReader) {
     </div>
   </div>
 </div>
-
-<script>
-$("#save_qiniu_setting").bind("click",function(){
-    $("#save_qiniu_setting").addClass("disabled");
-    $("#save_qiniu_setting").html("校验中");
-    
-    var bucket = $("#bucket").val();
-    var ak = $("#ak").val();
-    var sk = $("#sk").val();
-
-    $.cookie('bucket', bucket, { expires: 365 }); 
-    $.cookie('ak', ak, { expires: 365 }); 
-    $.cookie('sk', sk, { expires: 365 }); 
-
-    $.ajax({
-        type: 'POST',
-        url:"upload.php?a=test",
-    }).done(function(data){
-        if(data.status == "success"){
-            $('#myModal').modal('hide');
-            $('#current_bucket').html(bucket);
-            $("#verify_qiniu_message").slideUp();
-        }else{
-            $("#verify_qiniu_message").slideDown();
-            
-        }
-        $("#save_qiniu_setting").removeClass("disabled");
-        $("#save_qiniu_setting").html("保存");
-    })
-});
-
-$("#setting_button").bind("click",function(){
-    $('#myModal').modal();
-
-    $("#bucket").val($.cookie('bucket'));
-    $("#ak").val($.cookie('ak'));
-    $("#sk").val($.cookie('sk'));
-});
-
-if($.cookie('bucket') != null && $.cookie('bucket')!= ""){
-    $("#current_bucket").html($.cookie('bucket'));    
-}
-
-</script>
+<script src="js/copy.js"></script>
+<script src="js/drag.js"></script>
+<script src="js/setting.js"></script>
 </body>
 </html>
