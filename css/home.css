@@ -31,13 +31,14 @@ body {
 	display: none;
 	position: fixed;
 	top:0;
-	width: 200px;
+	width: 250px;
 	height: 46px;
 	padding-top: 12px;
 	text-align: center;
 	margin: auto;
 	left:0;
 	right:0;
+	z-index: 99999;
 }
 
 #help_message{
@@ -45,4 +46,24 @@ body {
 	color: #bbb;
 	display: block;
 	margin-top: 100px;
+}
+
+.setting{
+	text-align: right;
+	float: right;
+	margin: 6px 10px 10px 10px;
+}
+.form-control{
+	width:90%;
+}
+#verify_qiniu_message{
+	display: none;
+	margin-bottom: 0;
+	width:90%;
+}
+.modal-footer{
+	margin-top: 0;
+}
+.modal{
+	overflow-y:visible;
 }
