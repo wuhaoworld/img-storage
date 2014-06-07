@@ -88,6 +88,7 @@ document.body.onpaste = function(e) {
         var item = e.clipboardData.items[i];
         if (items[i].kind == 'file' && items[i].type == 'image/png') {
             $("#help_message").hide();
+            $("#settings_help").hide();
             var fileReader = new FileReader();
             fileReader.onloadend = function (){
                 var d = this.result.substr( this.result.indexOf(',')+1);

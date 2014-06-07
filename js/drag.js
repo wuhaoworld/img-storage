@@ -20,6 +20,7 @@ if (window.FileReader) {
         evt.stopPropagation();
         evt.preventDefault();
         $("#help_message").hide();
+        $("#settings_help").hide();
         var files = evt.dataTransfer.files;
         for (var i = 0; i < files.length; i++) {
             var f = files[i];
