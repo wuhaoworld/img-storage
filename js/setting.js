@@ -17,6 +17,7 @@ $("#save_qiniu_setting").bind("click",function(){
         if(data.status == "success"){
             $('#myModal').modal('hide');
             $('#current_bucket').html(bucket);
+            $("#logout").html('<a href="#" onclick="logout();">退出</a>');
             $("#verify_qiniu_message").slideUp();
         }else{
             $("#verify_qiniu_message").slideDown();
@@ -36,5 +37,14 @@ $("#setting_button").bind("click",function(){
 });
 
 if($.cookie('bucket') != null && $.cookie('bucket')!= ""){
-    $("#current_bucket").html($.cookie('bucket'));    
+    $("#current_bucket").html($.cookie('bucket'));
+    $("#logout").html('<a href="#" onclick="logout();">退出</a>');
+}
+
+function logout(){
+    $.cookie('bucket', null);
+    $.cookie('ak', null);
+    $.cookie('sk', null);
+    $('#current_bucket').html('公共空间');
+    $("#logout").html('');
 }
